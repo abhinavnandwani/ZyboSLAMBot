@@ -1,4 +1,3 @@
-Thank you for the clarification. Below is a **Markdown-formatted reference document** (`vivado_zybo_reference.md`) that explains **Tcl commands** for a Zybo Z7-20 + SystemVerilog Vivado project in a comprehensive, example-driven format.
 
 ---
 
