@@ -1,106 +1,231 @@
-######################################################################
-# Vivado Build Script for Zybo Z7-20 SystemVerilog Project
-# Author: [Your Name]
-# Board: Zybo Z7-20 (xilinx.com:zybo-z7-20:part0:1.1)
-# Description: Fully documented Tcl build script with Markdown-style
-#              comments for learning and automation.
-######################################################################
+Thank you for the clarification. Below is a **Markdown-formatted reference document** (`vivado_zybo_reference.md`) that explains **Tcl commands** for a Zybo Z7-20 + SystemVerilog Vivado project in a comprehensive, example-driven format.
 
-######################################################################
-# 🔧 Section 1: One-Time Project Setup Commands
-# Use these only once when creating a new project from scratch.
-######################################################################
+---
 
-# ## Create a new project targeting the Zybo Z7-20 board
-# This uses Digilent's board preset for correct part, pins, and PS setup.
-# Example:
-#   create_project my_proj ./my_proj -board xilinx.com:zybo-z7-20:part0:1.1 -force
-# Note: Run once and remove/comment if project is already created.
-#
-# Uncomment to use:
-# create_project zybo_project ../zybo_project -board xilinx.com:zybo-z7-20:part0:1.1 -force
+# 🛠 Vivado + Zybo Z7-20 Tcl Reference Guide
 
-# ## (Optional) Manually set board and part
-# set_property BOARD_PART xilinx.com:zybo-z7-20:part0:1.1 [current_project]
-# set_property PART xc7z020clg400-1 [current_project]
+> This guide explains the necessary Tcl commands to automate a Vivado project for the **Zybo Z7-20**, targeting **SystemVerilog** designs. Each command is described with its purpose and example usage.
 
-# ## Confirm board assignment
-# current_board_part -verbose
+---
 
+## 📁 Project Setup (One-Time)
 
-######################################################################
-# 🔁 Section 2: Reusable Build Commands
-# These are used every time you build the project.
-######################################################################
+These commands are used when creating a new project for the first time.
 
-# ## Open the existing Vivado project
-open_project ../zybo_project.xpr
+### 🎯 Create Project with Zybo Z7-20 Board
 
-# ## Ensure SystemVerilog is the target HDL
-# Set only once per project unless changed
+**Command**
+
+```tcl
+create_project <project_name> <project_dir> -board xilinx.com:zybo-z7-20:part0:1.1 -force
+```
+
+**Example**
+
+```tcl
+create_project zybo_project ./zybo_project -board xilinx.com:zybo-z7-20:part0:1.1 -force
+```
+
+> Uses Digilent's Zybo board preset to ensure correct part, I/O, and Zynq PS config.
+
+---
+
+### 🎯 Manually Set Part (Optional)
+
+**Command**
+
+```tcl
+set_property PART xc7z020clg400-1 [current_project]
+```
+
+> Useful if board files aren't installed or you want a minimal project without the board preset.
+
+---
+
+### 🔎 Verify Board Assignment
+
+**Command**
+
+```tcl
+current_board_part -verbose
+```
+
+**Output**
+Shows board, part, and preset configuration info to confirm correct setup.
+
+---
+
+## 🔁 Reusable Build Steps (Run Every Build)
+
+These commands are used regularly to synthesize, implement, and export your design.
+
+### 📂 Open Project
+
+**Command**
+
+```tcl
+open_project ./zybo_project/zybo_project.xpr
+```
+
+---
+
+### 💬 Set HDL Language
+
+**Command**
+
+```tcl
 set_property target_language SystemVerilog [current_project]
+```
 
-# ## Define your top-level module
-# Replace 'top' with the actual name of your top-level SystemVerilog module
+---
+
+### 📌 Set Top-Level Module
+
+**Command**
+
+```tcl
+set_property top <top_module_name> [current_fileset]
+```
+
+**Example**
+
+```tcl
 set_property top top [current_fileset]
+```
 
-# ## Add source files (.sv)
-# Use relative or absolute paths. Add multiple files if needed.
-add_files ../src/top.sv
+---
 
-# ## Add constraint files (.xdc)
-add_files -fileset constrs_1 ../constraints/zybo_z7.xdc
+### 📁 Add Sources
 
+**Command**
 
-######################################################################
-# 🧹 Section 3: Clean Build (Optional but Recommended)
-######################################################################
+```tcl
+add_files <path_to_sv_files>
+```
 
-# ## Reset previous synthesis and implementation runs
+**Example**
+
+```tcl
+add_files ./src/top.sv
+```
+
+---
+
+### 📁 Add Constraints
+
+**Command**
+
+```tcl
+add_files -fileset constrs_1 <path_to_xdc>
+```
+
+**Example**
+
+```tcl
+add_files -fileset constrs_1 ./constraints/zybo_z7.xdc
+```
+
+---
+
+## 🧹 Clean Previous Builds
+
+**Command**
+
+```tcl
 reset_run synth_1
 reset_run impl_1
+```
 
+> Clears previous synthesis and implementation results.
 
-######################################################################
-# 🏗 Section 4: Synthesis, Implementation, Bitstream
-######################################################################
+---
 
-# ## Launch synthesis
+## 🔨 Build Flow
+
+### 🔧 Synthesis
+
+**Command**
+
+```tcl
 launch_runs synth_1
 wait_on_run synth_1
+```
 
-# ## Launch implementation
+---
+
+### 🧱 Implementation
+
+**Command**
+
+```tcl
 launch_runs impl_1
 wait_on_run impl_1
+```
 
-# ## Generate bitstream
+---
+
+### 🧵 Generate Bitstream
+
+**Command**
+
+```tcl
 launch_runs impl_1 -to_step write_bitstream
 wait_on_run impl_1
+```
 
+---
 
-######################################################################
-# 📦 Section 5: Export Hardware (for Vitis or PetaLinux)
-######################################################################
+## 📦 Export for Software (Vitis / PetaLinux)
 
-# ## Export the .xsa hardware platform including the bitstream
-# Required for software development or Linux boot integration
-write_hw_platform -fixed -include_bit -force ../export/zybo_hardware.xsa
+**Command**
 
+```tcl
+write_hw_platform -fixed -include_bit -force ./export/zybo_hw.xsa
+```
 
-######################################################################
-# 🧩 Section 6: Optional – Block Design Workflow
-# If you're using a Zynq Processing System in a block design (.bd)
-######################################################################
+> Generates `.xsa` with bitstream for Vitis or embedded Linux workflows.
 
-# ## Open and validate a block design
-# Uncomment if needed
-# open_bd_design ./zybo_project.srcs/sources_1/bd/system/system.bd
-# validate_bd_design
-# save_bd_design
+---
 
+## 🧩 (Optional) Block Design with Zynq PS
 
-######################################################################
-# ✅ End of Script
-# You can run this file in batch mode:
-#   vivado -mode batch -source scripts/build.tcl
-######################################################################
+### 🔄 Open Block Design
+
+**Command**
+
+```tcl
+open_bd_design ./zybo_project.srcs/sources_1/bd/system/system.bd
+```
+
+---
+
+### ✅ Validate and Save
+
+**Command**
+
+```tcl
+validate_bd_design
+save_bd_design
+```
+
+---
+
+## 🚀 Batch Mode Usage
+
+Run the Tcl file (e.g., `build.tcl`) in batch mode:
+
+```bash
+vivado -mode batch -source ./scripts/build.tcl
+```
+
+---
+
+## 📚 References
+
+* [UG835: Vivado Tcl Command Reference Guide](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2022_2/ug835-vivado-tcl-commands.pdf)
+* [UG894: Vivado Design Suite User Guide – Tcl Scripting](https://www.xilinx.com/support/documentation/sw_manuals/xilinx2022_2/ug894-vivado-tcl-scripting.pdf)
+* [Digilent Zybo Z7-20 Reference Manual](https://digilent.com/reference/programmable-logic/zybo-z7/reference-manual)
+
+---
+
+Let me know if you want this as a downloadable `.md` file or integrated into a GitHub-friendly project template.
